@@ -1,6 +1,6 @@
 # PPY Project
 
-E-Library
+**E-Library
 
 The project consists of a web application that follows:
 -allowing user to purchase books, audio books, films
