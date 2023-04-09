@@ -4,14 +4,13 @@
 -- tables
 -- Table: Books
 CREATE TABLE Books (
-    id int  NOT NULL,
+    ID int AUTO_INCREMENT PRIMARY KEY,
     Name varchar(50)  NOT NULL,
     Writer varchar(50)  NOT NULL,
     Publisher varchar(50)  NOT NULL,
-    Type varchar(50)  NOT NULL,
+    Genre varchar(50)  NOT NULL,
     Number_of_Page int  NOT NULL,
     Edition int  NOT NULL,
-    CONSTRAINT Books_pk PRIMARY KEY  (id)
 );
 
 -- End of file.

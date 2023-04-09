@@ -4,12 +4,12 @@
 -- tables
 -- Table: Members
 CREATE TABLE Members (
-    Username varchar(50)  NOT NULL,
-    Password varchar(50)  NOT NULL,
-    Email varchar(50)  NOT NULL,
-    Recovery_Code int  NOT NULL,
-    CONSTRAINT Members_pk PRIMARY KEY  (id)
+    ID int AUTO_INCREMENT PRIMARY KEY,
+    Username varchar(50) NOT NULL,
+    Password varchar(50) NOT NULL,
+    Email varchar(50) NOT NULL,
+    Recovery_Code int NOT NULL
 );
 
--- End of file.
+
 
