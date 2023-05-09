@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+<<<<<<< HEAD
     <data-source source="LOCAL" name="Books" uuid="613db086-127a-4dd2-81d8-84bfb9ccadae">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
@@ -8,5 +9,26 @@
       <jdbc-url>jdbc:sqlite:$USER_HOME$/Desktop/E-Library/E-Library-With-Python-Programming/E-Library/Books.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+=======
+    <data-source source="LOCAL" name="Books" uuid="bea5673f-11bb-4df2-b999-e85f4fd4fa35">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\ENES CATAL\Desktop\E-Library-With-Python-Programming-main\E-Library-With-Python-Programming-main\E-Library\Books.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="Members" uuid="605b73fb-cb01-43a0-950b-9de1b75b4977">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\ENES CATAL\Desktop\E-Library-With-Python-Programming-main\E-Library-With-Python-Programming-main\E-Library\Members.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+      <libraries>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.40.1/org/xerial/sqlite-jdbc/3.40.1.0/sqlite-jdbc-3.40.1.0.jar</url>
+        </library>
+      </libraries>
+    </data-source>
+>>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
   </component>
 </project>
