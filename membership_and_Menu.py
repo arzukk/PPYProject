@@ -3,7 +3,6 @@ import time
 import sqlite3
 import lib
 
-
 class Membership():
     def __init__(self):
         self.cursor = None

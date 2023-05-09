@@ -1,7 +1,5 @@
 import time
-
 import sqlite3
-
 
 class Book():
     def __init__(self, name, writer, publisher, genre, number_of_page, edition):
