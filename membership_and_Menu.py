@@ -2,20 +2,8 @@ import random
 import time
 import sqlite3
 import lib
-
-<<<<<<< HEAD
-class Membership():
-    def __init__(self):
-        self.cursor = None
-        self.connection = None
-        self.Create_Connection()
-
-    def Create_Connection(self):
-        self.connection = sqlite3.connect("Members.sql")
-        self.cursor = self.connection.cursor()
-        query = "CREATE TABLE IF NOT EXISTS Members (Username varchar(50),Password varchar(50)," \
-                "Email varchar(50,Recovery_Code int)"
-=======
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 class Membership():
     def __init__(self):
@@ -25,7 +13,6 @@ class Membership():
         self.connection = sqlite3.connect("Members.db")
         self.cursor = self.connection.cursor()
         query = "CREATE TABLE IF NOT EXISTS Members (Username TEXT,Password TEXT,Email TEXT,Recovery_Code INT)"
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
         self.cursor.execute(query)
         self.connection.commit()
 
@@ -52,8 +39,6 @@ class Membership():
                 time.sleep(3)
                 print("Application is opening please wait...")
                 time.sleep(3)
-<<<<<<< HEAD
-=======
                 print("""
 
                         ************************************************
@@ -216,7 +201,6 @@ class Membership():
 
                     else:
                         print("You select invalid action! Please enter correct action")
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
 
     def Delete_Account(self, name, email):
         query = "SELECT * FROM Members WHERE Username = ? and Email = ?"

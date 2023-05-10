@@ -1,15 +1,6 @@
 import time
-<<<<<<< HEAD
-import sqlite3
-
-class Book():
-    def __init__(self, name, writer, publisher, genre, number_of_page, edition):
-        self.name = name
-        self.writer = writer
-        self.publisher = publisher
-        self.genre = genre
-=======
-
+from fastapi import FastAPI
+from pydantic import BaseModel
 import sqlite3
 
 
@@ -19,27 +10,16 @@ class Book():
         self.writer = writer
         self.publisher = publisher
         self.type = type
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
         self.number_of_page = number_of_page
         self.edition = edition
 
     def __str__(self):
-<<<<<<< HEAD
-        return "Name: {}\n Writer: {}\n Publisher: {}\n Genre: {}\n Number of Page: {}\n Edition: {}".format(
-            self.name,
-            self.writer,
-            self.publisher,
-            self.genre,
-            self.number_of_page,
-            self.edition)
-=======
         return " Name: {}\n Writer: {}\n Publisher: {}\n Type: {}\n Number of Page: {}\n Edition: {}".format(self.name,
                                                                                                              self.writer,
                                                                                                              self.publisher,
                                                                                                              self.type,
                                                                                                              self.number_of_page,
                                                                                                              self.edition)
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
 
 
 class Library():
@@ -47,17 +27,9 @@ class Library():
         self.Create_Connection()
 
     def Create_Connection(self):
-<<<<<<< HEAD
-        self.connection = sqlite3.connect("Books.sql")
-        self.cursor = self.connection.cursor()
-        query = "CREATE TABLE IF NOT EXISTS Books (Name varchar(50), Writer varchar(50)," \
-                "Publisher varchar(50)," \
-                "Genre varchar(50),Number_of_Page int, Edition int)"
-=======
         self.connection = sqlite3.connect("Books.db")
         self.cursor = self.connection.cursor()
         query = "CREATE TABLE IF NOT EXISTS Books (Name TEXT,Writer TEXT ,Publisher TEXT,Type TEXT,Number of Page INT,Edition INT)"
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
         self.cursor.execute(query)
         self.connection.commit()
 
@@ -90,20 +62,11 @@ class Library():
             print(book)
             print("************************************************")
 
-<<<<<<< HEAD
-    def Add_To_Book(self, name, writer, publisher, genre, number_of_page, edition):
-        query = "INSERT INTO Books VALUES (?,?,?,?,?,?)"
-        book = Book(name, writer, publisher, genre, number_of_page, edition)
-        self.cursor.execute(query,
-                            (book.name, book.writer, book.publisher, book.genre, book.number_of_page,
-                             book.edition))
-=======
     def Add_To_Book(self, name, writer, publisher, type, number_of_page, edition):
         query = "INSERT INTO Books VALUES (?,?,?,?,?,?)"
         book = Book(name, writer, publisher, type, number_of_page, edition)
         self.cursor.execute(query,
                             (book.name, book.writer, book.publisher, book.type, book.number_of_page, book.edition))
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
         self.connection.commit()
 
     def Delete_Book(self, name):
@@ -143,11 +106,7 @@ class Library():
             new_edition = int(input("Enter the new edition number: "))
 
             query = "UPDATE Books SET Edition = ? WHERE Name = ?"
-<<<<<<< HEAD
-            self.cursor.execute(query, (new_edition, id))
-=======
             self.cursor.execute(query, (new_edition, name))
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
             self.connection.commit()
             print("The edition of the book has been updated.")
 
@@ -159,11 +118,7 @@ class Library():
         if book:
             if book[5] == 0:
                 query = "UPDATE Books SET IsBorrowed = ?, Deadline = ? WHERE Name = ?"
-<<<<<<< HEAD
-                self.cursor.execute(query, (1, deadline, id,))
-=======
                 self.cursor.execute(query, (1, deadline, name,))
->>>>>>> f1641a8aa7d8c7b161ca6be522b1159adea89f8f
                 self.connection.commit()
                 print(f"Book '{name}' is successfully borrowed. Please return by {deadline}.")
             else:
