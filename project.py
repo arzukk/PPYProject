@@ -14,7 +14,7 @@ class Login:
         self.logged_in = False
 
     def login(self, username: str, password: str) -> bool:
-        if username == "admin" and password == "password":
+        if username == "username" and password == "password":
             self.logged_in = True
         else:
             self.logged_in = False
