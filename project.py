@@ -5,7 +5,6 @@ from pydantic import BaseModel
 import random
 import sqlite3
 
-# Define Pydantic models
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -15,7 +14,6 @@ class CreateUserRequest(BaseModel):
     password: str
     email: str
 
-# Create a Login class to handle login and account creation
 class Login:
     def __init__(self):
         self.create_connection()
@@ -208,24 +206,139 @@ def login_user(request: LoginRequest):
     else:
         raise HTTPException(status_code=401, detail="Login failed!")
 
+@app.get("/create-account", response_class=HTMLResponse)
+def show_create_account_form():
+    return """
+        <html>
+        <head>
+            <title>Create Account</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f2f2f2;
+                    padding: 20px;
+                }
 
+                h1 {
+                    text-align: center;
+                    color: #333;
+                }
 
+                form {
+                    max-width: 300px;
+                    margin: 0 auto;
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
 
+                label {
+                    display: block;
+                    margin-bottom: 10px;
+                    font-weight: bold;
+                }
+
+                input[type="text"],
+                input[type="password"],
+                input[type="email"] {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 3px;
+                    margin-bottom: 20px;
+                }
+
+                input[type="submit"] {
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #4caf50;
+                    border: none;
+                    color: #fff;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+
+                input[type="submit"]:hover {
+                    background-color: #45a049;
+                }
+
+                .error-message {
+                    color: red;
+                    margin-top: 10px;
+                    text-align: center;
+                }
+
+                .back-to-login-button {
+                    display: block;
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #4287f5;
+                    border: none;
+                    color: #fff;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 10px;
+                    text-align: center;
+                    text-decoration: none;
+                    border-radius: 3px;
+                }
+
+                .back-to-login-button:hover {
+                    background-color: #1e66d1;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Create Account</h1>
+            <form action="/create-account" method="post" onsubmit="event.preventDefault(); createAccount()">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <input type="submit" value="Create Account">
+                <div id="error-message" class="error-message"></div>
+            </form>
+            <a href="/login" class="back-to-login-button">Back to Login</a>
+            <script>
+                function createAccount() {
+                    const form = document.querySelector('form');
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+                    fetch('/create-account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.message === 'Account created!') {
+                            window.location.href = '/account-creation';
+                        } else {
+                            const errorMessage = document.getElementById('error-message');
+                            errorMessage.textContent = 'Account creation failed!';
+                        }
+                    })
+                    .catch(error => console.error(error));
+                }
+            </script>
+        </body>
+        </html>
+    """
 
 @app.post("/create-account")
 def create_account(request: CreateUserRequest):
     login.create_account(request.username, request.password, request.email)
-    return RedirectResponse(url="/account-creation")
-
-@app.post("/account-creation")
-def account_creation(request: CreateUserRequest):
     return {"message": "Account created!"}
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
 
 
 
