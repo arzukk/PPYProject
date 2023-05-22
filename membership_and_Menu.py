@@ -28,6 +28,7 @@ class Membership():
     def Finish_Connection(self):
         self.connection.close()
 
+    @app.post("/account-creation")
     def Create_Account(self, user_name, password, email):
         query = "INSERT INTO Members VALUES (?,?,?,?)"
         recovery_cod = random.randint(1000, 9999)
