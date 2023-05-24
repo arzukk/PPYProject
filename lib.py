@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import sqlite3
 
-
+ 
 class Book():
     def __init__(self, name, writer, publisher, type, number_of_page, edition):
         self.name = name

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 import membership_and_Menu
 
 app = FastAPI()
-
+ 
 
 class LoginRequest(BaseModel):
     username: str
