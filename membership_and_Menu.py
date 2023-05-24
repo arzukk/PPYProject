@@ -28,50 +28,7 @@ class Membership():
     def Finish_Connection(self):
         self.connection.close()
 
-    @app.post("/account-creation")
-    def Create_Account(self, user_name, password, email):
-        query = "INSERT INTO Members VALUES (?,?,?,?)"
-        recovery_cod = random.randint(1000, 9999)
-        self.cursor.execute(query, (user_name, password, email, recovery_cod))
-        self.connection.commit()
 
-    def Login_Account(self, username, password):
-        query = "SELECT * FROM Members WHERE Username = ? and Password = ?"
-        self.cursor.execute(query, (username, password))
-        list1 = self.cursor.fetchall()
-
-        if len(list1) == 0:
-            return RedirectResponse(url="/login_failed")
-        else:
-            return RedirectResponse(url="/dashboard")
-
-    @app.get("/login_failed", response_class=HTMLResponse)
-    def login_failed(self):
-        return """
-            <html>
-            <head>
-                <title>Login Failed</title>
-            </head>
-            <body>
-                <h1>Login Failed</h1>
-                <p>There is no such account!</p>
-            </body>
-            </html>
-        """
-
-    @app.get("/dashboard", response_class=HTMLResponse)
-    def dashboard(self):
-        return """
-            <html>
-            <head>
-                <title>Dashboard</title>
-            </head>
-            <body>
-                <h1>Dashboard</h1>
-                <!-- Add your dashboard content here -->
-            </body>
-            </html>
-        """
 
 
 
