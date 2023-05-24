@@ -5,6 +5,9 @@ from pydantic import BaseModel
 import random
 import sqlite3
 
+from starlette.templating import Jinja2Templates
+
+
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -13,6 +16,10 @@ class CreateUserRequest(BaseModel):
     username: str
     password: str
     email: str
+
+class ForgotPasswordRequest(BaseModel):
+    username: str
+    recovery_code: str
 
 class Login:
     def __init__(self):
@@ -56,9 +63,27 @@ class Login:
         connection.commit()
         connection.close()
 
+    def forgot_password(self, username: str, recovery_code: str):
+        recovery_code = str(random.randint(1000, 9999))
+
+        connection = sqlite3.connect("Members.db")
+        cursor = connection.cursor()
+        query = "SELECT username, password, email, recovery_code FROM Members WHERE username = ? AND recovery_code = ?"
+        cursor.execute(query, (username, recovery_code))
+        result = cursor.fetchone()
+
+        if result:
+            # Reset the password or perform the necessary actions
+            # based on the successful recovery code verification
+            pass
+
+        connection.close()
+
 
 login = Login()
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
 
 @app.get("/")
 def home():
@@ -144,6 +169,24 @@ def show_login_form():
                 .create-account-button:hover {
                     background-color: #1e66d1;
                 }
+                .forgot-password-button {
+                    display: block;
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #4287f5;
+                    border: none;
+                    color: #fff;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 10px;
+                    text-align: center;
+                    text-decoration: none;
+                    border-radius: 3px;
+                }
+
+                .forgot-password-button:hover {
+                    background-color: #1e66d1;
+                }
             </style>
         </head>
         <body>
@@ -157,6 +200,8 @@ def show_login_form():
                 <div id="error-message" class="error-message"></div>
             </form>
             <a href="/create-account" class="create-account-button">Create Account</a>
+            <a href="/forgot-password" class="forgot-password-button">Forgot Password</a>
+
             <script>
                 function login() {
                     const form = document.querySelector('form');
@@ -336,6 +381,34 @@ def create_account(request: CreateUserRequest):
     return {"message": "Account created!"}
 
 
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+def show_forgot_password_form(request: ForgotPasswordRequest):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+@app.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest):
+    login.forgot_password(request.username, request.password, request.email)
+    return {"message": "Forgot password action taken"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
@@ -345,7 +418,7 @@ if __name__ == "__main__":
 
 
 
-
+###borrow book retorn book
 
 
 # class PasswordRecoveryRequest(BaseModel):
