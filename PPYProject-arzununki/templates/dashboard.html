@@ -1,21 +1,96 @@
 <!DOCTYPE html>
 <html>
-        <head>
-            <title>Library Dashboard</title>
-        </head>
-        <body>
-            <h1>Welcome to the Library Dashboard!</h1>
-            <h2>Menu:</h2>
-            <ul>
-                <li><a href="/show-books">Show all books</a></li>
-                <li><a href="/query-book">Query a book</a></li>
-                <li><a href="/add-book">Add a book</a></li>
-                <li><a href="/delete-book">Delete a book</a></li>
-                <li><a href="/update-edition">Update the edition</a></li>
-                <li><a href="/borrow-book">Borrow a book</a></li>
-                <li><a href="/return-book">Return a book</a></li>
-                <li><a href="/account-settings">Account settings</a></li>
-            </ul>
-            <!-- Additional dashboard content goes here -->
-        </body>
+<head>
+    <title>Library Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .logout-button {
+            float: right;
+            margin-top: 10px;
+        }
+        .timer {
+            float: right;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+      let timerId;
+      let minutes = 0;
+      let seconds = 0;
+
+      function logout() {
+          clearInterval(timerId); // Stop the timer
+          fetch('/logout', {
+              method: 'POST',
+          })
+          .then(() => {
+              window.location.href = '/login';
+          })
+          .catch(error => console.error(error));
+      }
+
+      function resetTimer() {
+          clearInterval(timerId);
+          minutes = 0;
+          seconds = 0;
+          timerId = setInterval(updateTimer, 1000); // Updating the timer every second
+      }
+
+      function updateTimer() {
+          seconds++;
+          if (seconds >= 60) {
+              seconds = 0;
+              minutes++;
+          }
+          document.getElementById('timer').textContent = 'Time: ' + minutes + 'm ' + seconds + 's';
+
+          if (minutes >= 2) {
+              logout();
+          }
+      }
+
+      function startTimer() {
+          timerId = setInterval(updateTimer, 1000); // Updating the timer every second
+      }
+
+      window.onload = function () {
+          startTimer();
+          resetTimer();
+
+          // Reset the timer if there is no activity
+          document.addEventListener('mousemove', resetTimer);
+          document.addEventListener('keydown', resetTimer);
+          document.addEventListener('click', resetTimer);
+      };
+  </script>
+</head>
+<body>
+    <h1>Welcome to the Library Dashboard!</h1>
+    <h2>Menu:</h2>
+    <ul>
+        <li><a href="/show-books">Show all books</a></li>
+        <li><a href="/query-book">Query a book</a></li>
+        <li><a href="/add-book">Add a book</a></li>
+        <li><a href="/delete-book">Delete a book</a></li>
+        <li><a href="/update-edition">Update the edition</a></li>
+        <li><a href="/borrow-book">Borrow a book</a></li>
+        <li><a href="/return-book">Return a book</a></li>
+        <li><a href="/account-settings">Account settings</a></li>
+    </ul>
+    <div class="logout-button">
+        <button onclick="logout()">Logout</button>
+    </div>
+    <div class="timer">
+        <span id="timer">Time: 0 minutes</span>
+    </div>   
+  </body>
 </html>
