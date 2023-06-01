@@ -69,8 +69,8 @@ def home(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
-def show_login_form():
-    return templates.TemplateResponse("login.html", {})
+def show_login_form(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def show_dashboard(request: Request):
@@ -87,14 +87,9 @@ def login_user(request: LoginRequest):
 def show_dashboard(request: CreateDashboardRequest):
     return RedirectResponse(url="/dashboard")
 
-@app.route("/create-account", methods=["GET", "POST"])
+@app.get("/create-account")
 def show_create_account_form(request: Request):
-    if request.method == "POST":
-        username = Form(str)
-        password = Form(str)
-        return {"message": "Account created!"}
-    else:
-        return templates.TemplateResponse("createAccount.html", {"request": request})
+    return templates.TemplateResponse("createAccount.html", {"request": request})
 
 @app.post("/create-account")
 def create_account(request: CreateUserRequest):

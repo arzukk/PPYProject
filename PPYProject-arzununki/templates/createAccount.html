@@ -81,7 +81,7 @@
         </head>
         <body>
             <h1>Create Account</h1>
-            <form action="/create-account" method="post" onsubmit="event.preventDefault(); createAccount()">
+            <form action="/create-account" method="POST" onsubmit="event.preventDefault(); createAccount()">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
                 <label for="password">Password:</label>
@@ -90,31 +90,31 @@
                 <input type="email" id="email" name="email" required>
                 <input type="submit" value="Create Account">
                 <div id="error-message" class="error-message"></div>
-            </form>
-            <a href="/login" class="back-to-login-button">Back to Login</a>
-            <script>
+              </form>
+              <a href="/login" class="back-to-login-button">Back to Login</a>
+              <script>
                 function createAccount() {
-                    const form = document.querySelector('form');
-                    const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
-                    fetch('/create-account', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    })
+                  const form = document.querySelector('form');
+                  const formData = new FormData(form);
+                  const data = Object.fromEntries(formData.entries());
+                  fetch('/create-account', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                  })
                     .then(response => response.json())
                     .then(result => {
-                        if (result.message === 'Account created!') {
-                            window.location.href = '/account-creation';
-                        } else {
-                            const errorMessage = document.getElementById('error-message');
-                            errorMessage.textContent = 'Account creation failed!';
-                        }
+                      if (result.message === 'Account created!') {
+                        window.location.href = '/login';
+                      } else {
+                        const errorMessage = document.getElementById('error-message');
+                        errorMessage.textContent = 'Account creation failed!';
+                      }
                     })
                     .catch(error => console.error(error));
                 }
-            </script>
-        </body>
-    </html>
+              </script>
+            </body>
+          </html>
