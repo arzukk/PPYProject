@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    {% if books %}
+        <h2>Query Results:</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Writer</th>
+                <th>Publisher</th>
+                <th>Type</th>
+                <th>Number of Pages</th>
+                <th>Edition</th>
+            </tr>
+            {% for book in books %}
+            <tr>
+                <td>{{ book[0] }}</td>
+                <td>{{ book[1] }}</td>
+                <td>{{ book[2] }}</td>
+                <td>{{ book[3] }}</td>
+                <td>{{ book[4] }}</td>
+                <td>{{ book[5] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>{{ message }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Forgot Password</title>
+    <title>Library Login Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,7 +58,7 @@
             text-align: center;
         }
 
-        .back-to-login-button {
+        .create-account-button {
             display: block;
             width: 100%;
             padding: 10px;
@@ -73,45 +73,46 @@
             border-radius: 3px;
         }
 
-        .back-to-login-button:hover {
+        .create-account-button:hover {
             background-color: #1e66d1;
         }
     </style>
 </head>
 <body>
-    <h1>Forgot Password</h1>
-    <form action="/reset-password" method="post" onsubmit="event.preventDefault(); resetPassword()">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="recovery_code">Recovery Code:</label>
-        <input type="text" id="recovery_code" name="recovery_code" required>
-        <input type="submit" value="Reset Password">
-        <div id="error-message" class="error-message"></div>
-    </form>
-    <a href="/login" class="back-to-login-button">Back to Login</a>
-    <script>
-        function resetPassword() {
-            const form = document.querySelector('form');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            fetch('/reset-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.message === 'Password reset successful!') {
-                    window.location.href = '/login';
-                } else {
-                    const errorMessage = document.getElementById('error-message');
-                    errorMessage.textContent = 'Password reset failed!';
-                }
-            })
-            .catch(error => console.error(error));
+<h1>Library Login</h1>
+<form id="login-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <input type="submit" value="Log In">
+    <div id="error-message" class="error-message"></div>
+</form>
+<a href="/create-account" class="create-account-button">Create Account</a>
+<script>
+    const loginForm = document.getElementById('login-form');
+
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(loginForm);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            window.location.href = '/dashboard';
+        } else {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = 'Login failed!';
         }
-    </script>
+    });
+</script>
 </body>
 </html>

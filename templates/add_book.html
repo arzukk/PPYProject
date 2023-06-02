@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #4287f5;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #1e66d1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Book</h1>
+<form method="POST" action="/add-book" enctype="application/x-www-form-urlencoded">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="writer" placeholder="Writer" required>
+        <input type="text" name="publisher" placeholder="Publisher" required>
+        <input type="text" name="type" placeholder="Type" required>
+        <input type="number" name="number_of_page" placeholder="Number of Pages" required>
+        <input type="number" name="edition" placeholder="Edition" required>
+        <button type="submit">Add Book</button>
+    </form>
+</body>
+</html>

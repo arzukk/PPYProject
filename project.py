@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Form
-from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
-from pydantic import BaseModel
-import random
 import sqlite3
-
-from starlette.templating import Jinja2Templates
+import random
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Request, HTTPException, Form
+from pydantic import BaseModel, Field
+from fastapi import Request
+import traceback
 
 
 class LoginRequest(BaseModel):
@@ -17,9 +17,22 @@ class CreateUserRequest(BaseModel):
     password: str
     email: str
 
-class ForgotPasswordRequest(BaseModel):
-    username: str
-    recovery_code: str
+class QueryBookRequest(BaseModel):
+    book_name: str = Field(..., min_length=1)
+
+class DeleteBookRequest(BaseModel):
+    book_name: str = Field(..., min_length=1)
+
+class AddBookRequest(BaseModel):
+    name: str = Field(..., description="Name of the book", max_length=100)
+    writer: str = Field(..., description="Writer of the book", max_length=100)
+    publisher: str = Field(..., description="Publisher of the book", max_length=100)
+    type: str = Field(..., description="Type/genre of the book", max_length=100)
+    number_of_page: int = Field(..., description="Number of pages in the book")
+    edition: int = Field(..., description="Edition of the book")
+
+class CreateDashboardRequest(BaseModel):
+    pass
 
 class Login:
     def __init__(self):
@@ -37,12 +50,9 @@ class Login:
         self.connection.close()
 
     def login(self, username: str, password: str) -> bool:
-        connection = sqlite3.connect("Members.db")
-        cursor = connection.cursor()
         query = "SELECT * FROM Members WHERE username = ? AND password = ?"
-        cursor.execute(query, (username, password))
-        result = cursor.fetchone()
-        connection.close()
+        self.cursor.execute(query, (username, password))
+        result = self.cursor.fetchone()
 
         if result:
             self.logged_in = True
@@ -63,370 +73,184 @@ class Login:
         connection.commit()
         connection.close()
 
-    def forgot_password(self, username: str, recovery_code: str):
-        recovery_code = str(random.randint(1000, 9999))
+    def delete_account(self, request: LoginRequest):
+        query = "DELETE FROM Members WHERE Username = ? AND Password = ?"
+        self.cursor.execute(query, (request.username, request.password))
+        self.connection.commit()
 
-        connection = sqlite3.connect("Members.db")
+    def check_account_exists(self, username: str) -> bool:
+        query = "SELECT * FROM Members WHERE Username = ?"
+        self.cursor.execute(query, (username,))
+        result = self.cursor.fetchone()
+        return result is not None
+
+class Library:
+    def __init__(self):
+        self.create_connection()
+
+    def create_connection(self):
+        self.connection = sqlite3.connect("Books.db")
+        self.cursor = self.connection.cursor()
+        query = "CREATE TABLE IF NOT EXISTS Books (Name TEXT, Writer TEXT, Publisher TEXT, Type TEXT, Number INT, Edition INT, Borrowed INT DEFAULT 0, Deadline TEXT DEFAULT NULL)"
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def finish_connection(self):
+        self.connection.close()
+
+    def get_all_books(self):
+        connection = sqlite3.connect("Books.db")
         cursor = connection.cursor()
-        query = "SELECT username, password, email, recovery_code FROM Members WHERE username = ? AND recovery_code = ?"
-        cursor.execute(query, (username, recovery_code))
-        result = cursor.fetchone()
+        query = "SELECT * FROM Books"
+        cursor.execute(query)
+        result = cursor.fetchall()
+        connection.close()
+        return result
 
-        if result:
-            # Reset the password or perform the necessary actions
-            # based on the successful recovery code verification
-            pass
+    def query_book(self, book_name: str):
+        connection = sqlite3.connect("Books.db")
+        cursor = connection.cursor()
+        query = "SELECT * FROM Books WHERE Name = ?"
+        cursor.execute(query, (book_name,))
+        result = cursor.fetchall()
+        connection.close()
+        return result
 
+    def delete_book(self, book_name: str):
+        connection = sqlite3.connect("Books.db")
+        cursor = connection.cursor()
+        query = "DELETE FROM Books WHERE Name = ?"
+        cursor.execute(query, (book_name,))
+        connection.commit()
         connection.close()
 
+    def add_book(self, name: str, writer: str, publisher: str, type: str, number: int, edition: int):
+        connection = sqlite3.connect("Books.db")
+        cursor = connection.cursor()
+        query = "INSERT INTO Books (Name, Writer, Publisher, Type, Number, Edition) VALUES (?,?,?,?,?,?)"
+        cursor.execute(query, (name, writer, publisher, type, number, edition))
+        connection.commit()
+        connection.close()
+
+app = FastAPI()
+templates = Jinja2Templates(directory="/Users/arzukilic/PycharmProjects/PPYProject/templates")
 
 login = Login()
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-
+library = Library()
 
 @app.get("/")
-def home():
-    return RedirectResponse(url="/login")
+def home(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
-def show_login_form():
-    return """
-        <html>
-        <head>
-            <title>Library Login Page</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f2f2f2;
-                    padding: 20px;
-                }
-
-                h1 {
-                    text-align: center;
-                    color: #333;
-                }
-
-                form {
-                    max-width: 300px;
-                    margin: 0 auto;
-                    background-color: #fff;
-                    padding: 20px;
-                    border-radius: 5px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                }
-
-                label {
-                    display: block;
-                    margin-bottom: 10px;
-                    font-weight: bold;
-                }
-
-                input[type="text"],
-                input[type="password"] {
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px solid #ccc;
-                    border-radius: 3px;
-                    margin-bottom: 20px;
-                }
-
-                input[type="submit"] {
-                    width: 100%;
-                    padding: 10px;
-                    background-color: #4caf50;
-                    border: none;
-                    color: #fff;
-                    font-weight: bold;
-                    cursor: pointer;
-                }
-
-                input[type="submit"]:hover {
-                    background-color: #45a049;
-                }
-
-                .error-message {
-                    color: red;
-                    margin-top: 10px;
-                    text-align: center;
-                }
-
-                .create-account-button {
-                    display: block;
-                    width: 100%;
-                    padding: 10px;
-                    background-color: #4287f5;
-                    border: none;
-                    color: #fff;
-                    font-weight: bold;
-                    cursor: pointer;
-                    margin-top: 10px;
-                    text-align: center;
-                    text-decoration: none;
-                    border-radius: 3px;
-                }
-
-                .create-account-button:hover {
-                    background-color: #1e66d1;
-                }
-                .forgot-password-button {
-                    display: block;
-                    width: 100%;
-                    padding: 10px;
-                    background-color: #4287f5;
-                    border: none;
-                    color: #fff;
-                    font-weight: bold;
-                    cursor: pointer;
-                    margin-top: 10px;
-                    text-align: center;
-                    text-decoration: none;
-                    border-radius: 3px;
-                }
-
-                .forgot-password-button:hover {
-                    background-color: #1e66d1;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Library Login</h1>
-            <form action="/login" method="post" onsubmit="event.preventDefault(); login()">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <input type="submit" value="Log In">
-                <div id="error-message" class="error-message"></div>
-            </form>
-            <a href="/create-account" class="create-account-button">Create Account</a>
-            <a href="/forgot-password" class="forgot-password-button">Forgot Password</a>
-
-            <script>
-                function login() {
-                    const form = document.querySelector('form');
-                    const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
-                    fetch('/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.message === 'Login successful!') {
-                            window.location.href = '/dashboard';
-                        } else {
-                            const errorMessage = document.getElementById('error-message');
-                            errorMessage.textContent = 'Login failed!';
-                        }
-                    })
-                    .catch(error => console.error(error));
-                }
-            </script>
-        </body>
-        </html>
-    """
+def show_login_form(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse)
-def show_dashboard():
-    return """
-        <html>
-        <head>
-            <title>Library Dashboard</title>
-        </head>
-        <body>
-            <h1>Welcome to the Library Dashboard!</h1>
-            <!-- Dashboard content goes here -->
-        </body>
-        </html>
-    """
+def show_dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
-@app.post("/login")
-def login_user(request: LoginRequest):
+@app.post("/login", response_class=RedirectResponse)
+async def login_user(request: LoginRequest):
     if login.login(request.username, request.password):
-        return {"message": "Login successful!"}
+        library.logged_in = True  # Update the library instance's logged_in attribute
+        return RedirectResponse(url="/dashboard", status_code=303)
     else:
         raise HTTPException(status_code=401, detail="Login failed!")
 
-@app.get("/create-account", response_class=HTMLResponse)
-def show_create_account_form():
-    return """
-        <html>
-        <head>
-            <title>Create Account</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f2f2f2;
-                    padding: 20px;
-                }
 
-                h1 {
-                    text-align: center;
-                    color: #333;
-                }
+@app.post("/dashboard")
+def show_dashboard(request: CreateDashboardRequest):
+    return RedirectResponse(url="/dashboard")
 
-                form {
-                    max-width: 300px;
-                    margin: 0 auto;
-                    background-color: #fff;
-                    padding: 20px;
-                    border-radius: 5px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                }
-
-                label {
-                    display: block;
-                    margin-bottom: 10px;
-                    font-weight: bold;
-                }
-
-                input[type="text"],
-                input[type="password"],
-                input[type="email"] {
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px solid #ccc;
-                    border-radius: 3px;
-                    margin-bottom: 20px;
-                }
-
-                input[type="submit"] {
-                    width: 100%;
-                    padding: 10px;
-                    background-color: #4caf50;
-                    border: none;
-                    color: #fff;
-                    font-weight: bold;
-                    cursor: pointer;
-                }
-
-                input[type="submit"]:hover {
-                    background-color: #45a049;
-                }
-
-                .error-message {
-                    color: red;
-                    margin-top: 10px;
-                    text-align: center;
-                }
-
-                .back-to-login-button {
-                    display: block;
-                    width: 100%;
-                    padding: 10px;
-                    background-color: #4287f5;
-                    border: none;
-                    color: #fff;
-                    font-weight: bold;
-                    cursor: pointer;
-                    margin-top: 10px;
-                    text-align: center;
-                    text-decoration: none;
-                    border-radius: 3px;
-                }
-
-                .back-to-login-button:hover {
-                    background-color: #1e66d1;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Create Account</h1>
-            <form action="/create-account" method="post" onsubmit="event.preventDefault(); createAccount()">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <input type="submit" value="Create Account">
-                <div id="error-message" class="error-message"></div>
-            </form>
-            <a href="/login" class="back-to-login-button">Back to Login</a>
-            <script>
-                function createAccount() {
-                    const form = document.querySelector('form');
-                    const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
-                    fetch('/create-account', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.message === 'Account created!') {
-                            window.location.href = '/account-creation';
-                        } else {
-                            const errorMessage = document.getElementById('error-message');
-                            errorMessage.textContent = 'Account creation failed!';
-                        }
-                    })
-                    .catch(error => console.error(error));
-                }
-            </script>
-        </body>
-        </html>
-    """
+@app.get("/create-account")
+def show_create_account_form(request: Request):
+    return templates.TemplateResponse("createAccount.html", {"request": request})
 
 @app.post("/create-account")
 def create_account(request: CreateUserRequest):
     login.create_account(request.username, request.password, request.email)
     return {"message": "Account created!"}
 
+@app.get("/delete-account")
+def show_delete_account_form(request: Request):
+    return templates.TemplateResponse("deleteAccount.html", {"request": request})
+
+@app.post("/delete-account")
+async def delete_account(request: LoginRequest):
+    login.delete_account(request)
+    return {"message": "Account deleted successfully!"}
+    raise HTTPException(status_code=404, detail="Account not found!")
 
 
-@app.get("/forgot-password", response_class=HTMLResponse)
-def show_forgot_password_form(request: ForgotPasswordRequest):
-    return templates.TemplateResponse("forgot_password.html", {"request": request})
-@app.post("/forgot-password")
-def forgot_password(request: ForgotPasswordRequest):
-    login.forgot_password(request.username, request.password, request.email)
-    return {"message": "Forgot password action taken"}
+@app.get("/show-books", response_class=HTMLResponse)
+def show_books(request: Request):
+    books = library.get_all_books()
+    return templates.TemplateResponse("showBooks.html", {"request": request, "books": books})
+
+@app.get("/query-book", response_class=HTMLResponse)
+def show_query_book_form(request: Request):
+    return templates.TemplateResponse("queryBook.html", {"request": request})
+
+@app.post("/query-book", response_class=HTMLResponse)
+def query_book(request: QueryBookRequest):
+    book_name = request.book_name
+    books = library.query_book(book_name)
+    if books:
+        return templates.TemplateResponse("queryBookResult.html", {"request": request, "books": books})
+    else:
+        return templates.TemplateResponse("queryBookResult.html", {"request": request, "message": "No books found with the given name."})
 
 
+@app.get("/add-book", response_class=HTMLResponse)
+def show_add_book_form(request: Request):
+    if not library.logged_in:
+        raise HTTPException(status_code=400, detail="You are not logged in.")
+    return templates.TemplateResponse("add_book.html", {"request": request})
 
 
+@app.post("/add-book")
+async def add_book(request: Request):
+    try:
+        form_data = await request.form()
+        library.add_book(
+            form_data["name"],
+            form_data["writer"],
+            form_data["publisher"],
+            form_data["type"],
+            int(form_data["number_of_page"]),
+            int(form_data["edition"])
+        )
+        return RedirectResponse("/dashboard", status_code=303)
+    except Exception as e:
+        traceback.print_exc()  # Print the traceback for debugging
+        raise HTTPException(status_code=500, detail="Failed to add book")
 
 
+@app.get("/delete-book", response_class=HTMLResponse)
+def show_delete_book_form(request: Request):
+    return templates.TemplateResponse("delete_book.html", {"request": request})
 
 
+@app.post("/delete-book", response_class=HTMLResponse)
+async def delete_book(request: Request):
+    try:
+        form_data = await request.form()
+        book_name = form_data["book_name"]
+        books = library.query_book(book_name)
 
-
-
-
-
-
-
-
-
-
+        if books:
+            library.delete_book(book_name)
+            return templates.TemplateResponse("delete_book.html",
+                                              {"request": request, "message": "Book deleted successfully."})
+        else:
+            return templates.TemplateResponse("delete_book.html",
+                                              {"request": request, "message": "No such book exists."})
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Failed to delete book")
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-
-
-
-
-###borrow book retorn book
-
-
-# class PasswordRecoveryRequest(BaseModel):
-#     username: str
-#     email: str
-#
-# @app.post("/password_recovery")
-# def password_recovery(request: PasswordRecoveryRequest):
-#     member = membership_and_Menu.Membership()
-#     member.Recovery_Code(request.username, request.email)
-#     return {"status": "success"}

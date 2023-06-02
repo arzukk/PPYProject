@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Library Dashboard</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f2f2f2;
+                padding: 20px;
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+
+            h2 {
+                color: #333;
+            }
+
+            ul {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            li {
+                margin-bottom: 10px;
+            }
+
+            a {
+                display: inline-block;
+                padding: 10px;
+                background-color: #4287f5;
+                border: none;
+                color: #fff;
+                font-weight: bold;
+                text-decoration: none;
+                border-radius: 3px;
+            }
+
+            a:hover {
+                background-color: #1e66d1;
+            }
+
+            .delete-account-button {
+                background-color: #ff0000;
+            }
+
+            .delete-account-button:hover {
+                background-color: #cc0000;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome to the Library Dashboard!</h1>
+        <h2>Menu:</h2>
+        <ul>
+            <li><a href="/show-books">Show all books</a></li>
+            <li><a href="/query-book">Query a book</a></li>
+            <li><a href="/add-book">Add a book</a></li>
+            <li><a href="/delete-book">Delete a book</a></li>
+            <li><a href="/update-edition">Update the edition</a></li>
+            <li><a href="/borrow-book">Borrow a book</a></li>
+            <li><a href="/return-book">Return a book</a></li>
+            <li><a href="/account-settings">Account settings</a></li>
+            <li><a href="/delete-account" class="delete-account-button">Delete account</a></li>
+        </ul>
+        <!-- Additional dashboard content goes here -->
+    </body>
+</html>

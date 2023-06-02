@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #f44336;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #d32f2f;
+        }
+
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .back-to-login-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4287f5;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .back-to-login-button:hover {
+            background-color: #1e66d1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Delete Account</h1>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password"><br>
+    <button onclick="deleteAccount()">Delete Account</button>
+    <div id="success-message" class="success-message"></div>
+    <div id="error-message" class="error-message"></div>
+    <a href="/login" class="back-to-login-button">Back to Login</a>
+
+    <script>
+        function deleteAccount() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            fetch('/delete-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message === 'Account deleted successfully!') {
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.textContent = 'Account successfully deleted!';
+                } else {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = 'Account deletion failed!';
+                }
+            })
+            .catch(error => console.error(error));
+        }
+    </script>
+</body>
+</html>
