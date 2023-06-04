@@ -23,6 +23,10 @@ class QueryBookRequest(BaseModel):
 class DeleteBookRequest(BaseModel):
     book_name: str = Field(..., min_length=1)
 
+class UpdateBookEditionRequest(BaseModel):
+    book_name: str = Field(..., min_length=1)
+    new_edition: int
+
 class AddBookRequest(BaseModel):
     name: str = Field(..., description="Name of the book", max_length=100)
     writer: str = Field(..., description="Writer of the book", max_length=100)
@@ -34,6 +38,17 @@ class AddBookRequest(BaseModel):
 class CreateDashboardRequest(BaseModel):
     pass
 
+class ResetPasswordRequest(BaseModel):
+    username: str
+    recovery_code: str
+    new_password: str
+
+class AccountSettingsRequest(BaseModel):
+    pass
+
+class BorrowBookRequest(BaseModel):
+    book_name: str
+    borrower_name: str
 class Login:
     def __init__(self):
         self.create_connection()
@@ -84,6 +99,41 @@ class Login:
         result = self.cursor.fetchone()
         return result is not None
 
+    def reset_password(recovery_code, username, new_password):
+        conn = sqlite3.connect('Members.db')
+        cursor = conn.cursor()
+
+        # Query the user by recovery code and username
+        query = "SELECT * FROM users WHERE recovery_code=? AND username=?"
+        cursor.execute(query, (recovery_code, username))
+        user = cursor.fetchone()
+
+        if user is not None:
+            # Update the user's password
+            update_query = "UPDATE users SET password=? WHERE recovery_code=? AND username=?"
+            cursor.execute(update_query, (new_password, recovery_code, username))
+            conn.commit()
+            conn.close()
+            return {"message": "Password reset successful"}
+        else:
+            conn.close()
+            return {"message": "Invalid recovery code or username"}
+
+        ##account settings
+
+    def update_username(self, old_username: str, new_username: str):
+        query = "UPDATE Members SET Username = ? WHERE Username = ?"
+        self.cursor.execute(query, (new_username, old_username))
+        self.connection.commit()
+        self.username = new_username
+
+    def update_password(self, username: str, new_password: str):
+        query = "UPDATE Members SET Password = ? WHERE Username = ?"
+        self.cursor.execute(query, (new_password, username))
+        self.connection.commit()
+
+
+
 class Library:
     def __init__(self):
         self.create_connection()
@@ -124,6 +174,14 @@ class Library:
         connection.commit()
         connection.close()
 
+    def update_book_edition(self, book_name: str, new_edition: int):
+        connection = sqlite3.connect("Books.db")
+        cursor = connection.cursor()
+        query = "UPDATE Books SET Edition = ? WHERE Name = ?"
+        cursor.execute(query, (new_edition, book_name))
+        connection.commit()
+        connection.close()
+
     def add_book(self, name: str, writer: str, publisher: str, type: str, number: int, edition: int):
         connection = sqlite3.connect("Books.db")
         cursor = connection.cursor()
@@ -131,6 +189,30 @@ class Library:
         cursor.execute(query, (name, writer, publisher, type, number, edition))
         connection.commit()
         connection.close()
+
+    def borrow_book(self, book_name: str, borrower_name: str):
+        query = "SELECT * FROM Books WHERE Name = ?"
+        self.cursor.execute(query, (book_name,))
+        book = self.cursor.fetchone()
+
+        if book:
+            if book[6] == 0:
+                query = "UPDATE Books SET Borrowed = 1, Deadline = ? WHERE Name = ?"
+                deadline = self.calculate_deadline()
+                self.cursor.execute(query, (deadline, book_name))
+                self.connection.commit()
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def calculate_deadline(self):
+        # Implement your logic to calculate the deadline for returning the book
+        # This can be based on a fixed duration, such as 14 days from the borrowing date, or any other rules you have
+
+        # Return the calculated deadline as a string
+        return "2023-06-18"  # Example deadline
 
 app = FastAPI()
 templates = Jinja2Templates(directory="/Users/arzukilic/PycharmProjects/PPYProject/templates")
@@ -182,6 +264,61 @@ async def delete_account(request: LoginRequest):
     return {"message": "Account deleted successfully!"}
     raise HTTPException(status_code=404, detail="Account not found!")
 
+##account settings
+@app.get("/account-settings", response_class=HTMLResponse)
+def show_account_settings(request: Request):
+    return templates.TemplateResponse("accountSettings.html", {"request": request})
+
+@app.post("/delete-account")
+async def delete_account(request: AccountSettingsRequest):
+    login.delete_account(request)
+    return {"message": "Account deleted successfully!"}
+    raise HTTPException(status_code=404, detail="Account not found!")
+
+
+@app.post("/reset-password")
+async def reset_password_endpoint(request: Request):
+    form_data = await request.json()
+
+    recovery_code = form_data.get("recovery_code")
+    username = form_data.get("username")
+    new_password = form_data.get("new_password")
+
+    print(f"Recovery Code: {recovery_code}")
+    print(f"Username: {username}")
+    print(f"New Password: {new_password}")
+
+    if recovery_code is None or username is None or new_password is None:
+        return {"message": "Invalid form data"}
+
+    result = reset_password_endpoint(recovery_code, username, new_password)
+
+    return result
+@app.post("/change-username")
+async def change_username(request: AccountSettingsRequest):
+    old_username = login.username
+    new_username = "NewUsername"
+
+    if old_username == new_username:
+        raise HTTPException(status_code=400, detail="New username must be different from the old username.")
+
+    if login.check_account_exists(new_username):
+        raise HTTPException(status_code=400, detail="The new username is already taken.")
+
+    login.update_username(old_username, new_username)
+    login.username = new_username
+
+    return {"message": "Username changed successfully!"}
+
+@app.post("/change-password")
+async def change_password(request: Request):
+    form_data = await request.form()
+    new_password = form_data.get("new_password")
+    username = form_data.get("username")
+    login.update_password(username, new_password)
+
+    return {"message": "Password changed successfully!"}
+
 
 @app.get("/show-books", response_class=HTMLResponse)
 def show_books(request: Request):
@@ -223,10 +360,12 @@ async def add_book(request: Request):
         )
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
-        traceback.print_exc()  # Print the traceback for debugging
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Failed to add book")
 
-
+@app.get("/account-settings", response_class=HTMLResponse)
+def show_update_book_form(request: Request):
+    return templates.TemplateResponse("account_settings.html", {"request": request})
 @app.get("/delete-book", response_class=HTMLResponse)
 def show_delete_book_form(request: Request):
     return templates.TemplateResponse("delete_book.html", {"request": request})
@@ -250,6 +389,30 @@ async def delete_book(request: Request):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Failed to delete book")
 
+@app.get("/update-book-edition", response_class=HTMLResponse)
+def show_update_book_edition_form(request: Request):
+    return templates.TemplateResponse("update_book_edition.html", {"request": request})
+@app.post("/update-book-edition")
+async def update_book_edition(book_name: str = Form(...), new_edition: int = Form(...)):
+    if not library.logged_in:
+        raise HTTPException(status_code=400, detail="You are not logged in.")
+    library.update_book_edition(book_name, new_edition)
+    return {"message": f"Edition updated for book: {book_name}"}
+
+@app.get("/borrow-book")
+def show_borrow_book_form(request: Request):
+    return templates.TemplateResponse("borrowBook.html", {"request": request})
+
+@app.post("/borrow-book")
+def borrow_book(request: BorrowBookRequest):
+    book_name = request.book_name
+    borrower_name = request.borrower_name
+    # You can add additional validation or checks here, such as checking if the book is available.
+
+    # Call a method in the Library class to update the book's borrowed status and deadline.
+    library.borrow_book(book_name, borrower_name)
+
+    return {"message": f"Book '{book_name}' borrowed by '{borrower_name}'."}
 
 if __name__ == "__main__":
     import uvicorn

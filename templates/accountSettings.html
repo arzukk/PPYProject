@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Settings</title>
+    <link rel="stylesheet" href="C:\\Users\\ENES CATAL\\Downloads\\PPYProject-arzununki(1)\\PPYProject-arzununki\\css\\styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #f9f9f9;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function deleteAccount() {
+            const currentUsername = prompt("Enter your current username:");
+            if (currentUsername) {
+                fetch('/delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currentUsername: currentUsername })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Account deleted!");
+                        // Redirect to the login page
+                        window.location.href = "/login";
+                    } else {
+                        alert("Failed to delete the account.");
+                    }
+                })
+                .catch(error => console.error(error));
+            }
+        }
+
+
+        function changeUsername() {
+            const currentUsername = prompt("Enter your current username:");
+            if (currentUsername) {
+                const newUsername = prompt("Enter your new username:");
+                if (newUsername) {
+                    fetch('/change-username', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentUsername: currentUsername, newUsername: newUsername })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Username changed!");
+                            // Optionally update the displayed username on the page
+                        } else {
+                            alert("Failed to change the username.");
+                        }
+                    })
+                    .catch(error => console.error(error));
+                }
+            }
+        }
+
+        function changePassword() {
+            const currentPassword = prompt("Enter your current password:");
+            if (currentPassword) {
+                const newPassword = prompt("Enter your new password:");
+                if (newPassword) {
+                    fetch('/change-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentPassword: currentPassword, newPassword: newPassword })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Password changed!");
+                        } else {
+                            alert("Failed to change the password.");
+                        }
+                    })
+                    .catch(error => console.error(error));
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Account Settings</h1>
+    <button onclick="deleteAccount()">Delete Account</button>
+    <button onclick="changeUsername()">Change Username</button>
+    <button onclick="changePassword()">Change Password</button>
+    <a class="back-link" href="/dashboard">Go back to Dashboard</a>
+</body>
+</html>

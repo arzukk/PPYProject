@@ -28,16 +28,6 @@ class Membership():
     def Finish_Connection(self):
         self.connection.close()
 
-
-
-
-
-
-
-
-
-
-
     def Delete_Account(self, name, email):
         query = "SELECT * FROM Members WHERE Username = ? and Email = ?"
         self.cursor.execute(query, (name, email))

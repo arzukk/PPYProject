@@ -76,43 +76,111 @@
         .create-account-button:hover {
             background-color: #1e66d1;
         }
+
+        .forgot-password-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #e85c00;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .forgot-password-button:hover {
+            background-color: #b34700;
+        }
     </style>
 </head>
 <body>
-<h1>Library Login</h1>
-<form id="login-form">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    <input type="submit" value="Log In">
-    <div id="error-message" class="error-message"></div>
-</form>
-<a href="/create-account" class="create-account-button">Create Account</a>
-<script>
-    const loginForm = document.getElementById('login-form');
+    <h1>Library Login</h1>
+    <form id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Log In">
+        <div id="error-message" class="error-message"></div>
+    </form>
+    <a href="/create-account" class="create-account-button">Create Account</a>
+    <a href="javascript:void(0);" onclick="showForgotPasswordForm()" class="forgot-password-button">Forgot Password</a>
+    <div id="forgot-password-form" style="display: none;">
+    <h2>Forgot Password</h2>
+    <form id="reset-password-form">
+        <label for="recovery-code">Recovery Code:</label>
+        <input type="text" id="recovery-code" name="recovery_code" required>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="new-password">New Password:</label>
+        <input type="password" id="new-password" name="new_password" required>
+        <input type="submit" value="Reset Password">
+        <div id="reset-error-message" class="error-message"></div>
+    </form>
+    </div>
+    <script>
+        const loginForm = document.getElementById('login-form');
 
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-        const formData = new FormData(loginForm);
-        const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
 
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/dashboard';
+            } else {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = 'Login failed!';
+            }
         });
 
-        if (response.ok) {
-            window.location.href = '/dashboard';
-        } else {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = 'Login failed!';
+        function showForgotPasswordForm() {
+            const forgotPasswordForm = document.getElementById('forgot-password-form');
+            const loginForm = document.getElementById('login-form');
+
+            // Hide the login form
+            loginForm.style.display = 'none';
+
+            // Show the forgot password form
+            forgotPasswordForm.style.display = 'block';
         }
-    });
-</script>
+
+        const resetPasswordForm = document.getElementById('reset-password-form');
+
+        resetPasswordForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(resetPasswordForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                const errorMessage = document.getElementById('reset-error-message');
+                errorMessage.textContent = 'Failed to reset password!';
+            }
+        });
+    </script>
 </body>
 </html>
