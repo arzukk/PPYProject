@@ -5,11 +5,10 @@ Simple overview of use/purpose.
 ## Description
 
 The project consists of a web application that follows:
-* allowing user to purchase books, audio books, films
+* allowing user to purchase books
 * they can borrow some book from e-library(after the given deadline the access will suspend)
 * kind of system to allow free access for employees(login system)
-* the website will enable access to multiple libraries
-
+* account settings, dashboard, creating new user, adding-deleting
 ## Authors
 
 Arzu Kılıç and Enes Çatal
