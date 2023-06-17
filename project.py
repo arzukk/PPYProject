@@ -6,6 +6,9 @@ from fastapi import FastAPI, Request, HTTPException, Form
 from pydantic import BaseModel, Field
 from fastapi import Request
 import traceback
+from datetime import datetime, timedelta, date
+import logging
+
 
 
 class LoginRequest(BaseModel):
@@ -43,12 +46,13 @@ class ResetPasswordRequest(BaseModel):
     recovery_code: str
     new_password: str
 
+class BorrowBookRequest(BaseModel):
+    book_number: int
+    desired_date: date
+
 class AccountSettingsRequest(BaseModel):
     pass
 
-class BorrowBookRequest(BaseModel):
-    book_name: str
-    borrower_name: str
 class Login:
     def __init__(self):
         self.create_connection()
@@ -190,29 +194,66 @@ class Library:
         connection.commit()
         connection.close()
 
-    def borrow_book(self, book_name: str, borrower_name: str):
-        query = "SELECT * FROM Books WHERE Name = ?"
-        self.cursor.execute(query, (book_name,))
+        #################################
+
+    def borrow_book(self, borrow_request):
+        book_number = borrow_request.book_number
+        desired_date = borrow_request.desired_date
+
+        # Check if book exists
+        query = "SELECT * FROM Books WHERE Number = ?"
+        self.cursor.execute(query, (book_number,))
         book = self.cursor.fetchone()
+        if book is None:
+            return "Book not found"
 
-        if book:
-            if book[6] == 0:
-                query = "UPDATE Books SET Borrowed = 1, Deadline = ? WHERE Name = ?"
-                deadline = self.calculate_deadline()
-                self.cursor.execute(query, (deadline, book_name))
-                self.connection.commit()
-                return True
+        if book[6] == 1:
+            deadline = self.get_borrowed_deadline(book_number)
+            if deadline == "Book not found":
+                return "Book is already borrowed"
             else:
-                return False
-        else:
-            return False
+                return "Book is already borrowed. Deadline: " + deadline
 
-    def calculate_deadline(self):
-        # Implement your logic to calculate the deadline for returning the book
-        # This can be based on a fixed duration, such as 14 days from the borrowing date, or any other rules you have
+        borrowing_date = desired_date.isoformat()
+        deadline = (desired_date + timedelta(days=15)).isoformat()
 
-        # Return the calculated deadline as a string
-        return "2023-06-18"  # Example deadline
+        query = "UPDATE Books SET Borrowed = 1, Deadline = ? WHERE Number = ?"
+        self.cursor.execute(query, (deadline, book_number))
+        self.connection.commit()
+
+        return "Book borrowed successfully"
+
+    def get_book_status(self, book_number):
+        query = "SELECT * FROM Books WHERE Number = ?"
+        self.cursor.execute(query, (book_number,))
+        book = self.cursor.fetchone()
+        if book is None:
+            return "Book not found"
+
+        if book[6] == 0:
+            return "Book is available"
+
+        return "Book is borrowed"
+
+    def set_borrowed_status(self, book_number, borrowed):
+        query = "UPDATE Books SET Borrowed = ? WHERE Number = ?"
+        self.cursor.execute(query, (borrowed, book_number))
+        self.connection.commit()
+
+    def set_borrowed_deadline(self, book_number, deadline):
+        query = "UPDATE Books SET Deadline = ? WHERE Number = ?"
+        self.cursor.execute(query, (deadline, book_number))
+        self.connection.commit()
+
+    def get_borrowed_deadline(self, book_number):
+        query = "SELECT Deadline FROM Books WHERE Number = ?"
+        self.cursor.execute(query, (book_number,))
+        deadline = self.cursor.fetchone()
+        if deadline is None:
+            return "Book not found"
+
+        return deadline[0]
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="/Users/arzukilic/PycharmProjects/PPYProject/templates")
@@ -399,20 +440,26 @@ async def update_book_edition(book_name: str = Form(...), new_edition: int = For
     library.update_book_edition(book_name, new_edition)
     return {"message": f"Edition updated for book: {book_name}"}
 
-@app.get("/borrow-book")
+
+@app.get("/borrow-book", response_class=HTMLResponse)
 def show_borrow_book_form(request: Request):
     return templates.TemplateResponse("borrowBook.html", {"request": request})
 
 @app.post("/borrow-book")
-def borrow_book(request: BorrowBookRequest):
-    book_name = request.book_name
-    borrower_name = request.borrower_name
-    # You can add additional validation or checks here, such as checking if the book is available.
+def borrow_book(
+    request: Request,
+    book_number: int = Form(...),
+    desired_date: date = Form(...)
+):
+    borrow_request = BorrowBookRequest(book_number=book_number, desired_date=desired_date)
 
-    # Call a method in the Library class to update the book's borrowed status and deadline.
-    library.borrow_book(book_name, borrower_name)
+    library = Library()
+    result = library.borrow_book(borrow_request)
+    library.finish_connection()
 
-    return {"message": f"Book '{book_name}' borrowed by '{borrower_name}'."}
+    return {"message": result}
+
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -6,13 +6,15 @@
 <body>
     <h1>Borrow Book</h1>
     <form action="/borrow-book" method="post">
-        <label for="book_name">Book Name:</label><br>
-        <input type="text" id="book_name" name="book_name" required><br>
+        <label for="book_number">Book Number:</label>
+        <input type="number" id="book_number" name="book_number" required><br><br>
 
-        <label for="borrower_name">Borrower Name:</label><br>
-        <input type="text" id="borrower_name" name="borrower_name" required><br>
+        <label for="desired_date">Desired Date:</label>
+        <input type="date" id="desired_date" name="desired_date" required><br><br>
 
-        <input type="submit" value="Borrow">
+        <input type="submit" value="Borrow Book">
     </form>
+
+    <a href="/dashboard">Back to Dashboard</a>
 </body>
 </html>
