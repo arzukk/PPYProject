@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 300px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .create-account-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4287f5;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .create-account-button:hover {
+            background-color: #1e66d1;
+        }
+
+        .forgot-password-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #e85c00;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .forgot-password-button:hover {
+            background-color: #b34700;
+        }
+    </style>
+</head>
+<body>
+    <h1>Library Login</h1>
+    <form id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Log In">
+        <div id="error-message" class="error-message"></div>
+    </form>
+    <a href="/create-account" class="create-account-button">Create Account</a>
+    <a href="javascript:void(0);" onclick="showForgotPasswordForm()" class="forgot-password-button">Forgot Password</a>
+    <div id="forgot-password-form" style="display: none;">
+    <h2>Forgot Password</h2>
+    <form id="reset-password-form">
+        <label for="recovery-code">Recovery Code:</label>
+        <input type="text" id="recovery-code" name="recovery_code" required>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="new-password">New Password:</label>
+        <input type="password" id="new-password" name="new_password" required>
+        <input type="submit" value="Reset Password">
+        <div id="reset-error-message" class="error-message"></div>
+    </form>
+    </div>
+    <script>
+        const loginForm = document.getElementById('login-form');
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/dashboard';
+            } else {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = 'Login failed!';
+            }
+        });
+
+        function showForgotPasswordForm() {
+            const forgotPasswordForm = document.getElementById('forgot-password-form');
+            const loginForm = document.getElementById('login-form');
+
+            // Hide the login form
+            loginForm.style.display = 'none';
+
+            // Show the forgot password form
+            forgotPasswordForm.style.display = 'block';
+        }
+
+        const resetPasswordForm = document.getElementById('reset-password-form');
+
+        resetPasswordForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(resetPasswordForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                const errorMessage = document.getElementById('reset-error-message');
+                errorMessage.textContent = 'Failed to reset password!';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Book</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        header {
+            background-color: #007fff;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 10px;
+        }
+
+        nav a {
+            color: #007fff;
+            font-weight: bold;
+            margin: 10px;
+            padding: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #007fff;
+            color: #fff;
+        }
+
+        button {
+            background-color: #007fff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        button:hover {
+            background-color: #00529b;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Add Book</h1>
+    </header>
+    <nav>
+        <a href="/show-books">Show all books</a>
+        <a href="/query-book">Query a book</a>
+        <a href="/add-book">Add a book</a>
+        <a href="/delete-book">Delete a book</a>
+        <a href="/update-edition">Update the edition</a>
+        <a href="/borrow-book">Borrow a book</a>
+        <a href="/return-book">Return a book</a>
+        <a href="/account-settings">Account settings</a>
+    </nav>
+    <form method="POST" action="/add-book" enctype="application/x-www-form-urlencoded">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="writer" placeholder="Writer" required>
+        <input type="text" name="publisher" placeholder="Publisher" required>
+        <input type="text" name="type" placeholder="Type" required>
+        <input type="number" name="number_of_page" placeholder="Number of Pages" required>
+        <input type="number" name="edition" placeholder="Edition" required>
+        <button type="submit">Add Book</button>
+    </form>
+</body>
+</html>
